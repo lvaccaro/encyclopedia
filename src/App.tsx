@@ -21,13 +21,17 @@ import {
   Typography,
   Box,
 } from '@mui/material';
-import StockIcon from '@mui/icons-material/ShowChart'; // Example icon
+import { withStyles } from "@mui/material/styles";
 
 
 import { getSideswapMarket, getSideswapMarkets, Quote, Market } from './lib/sideswap';
 import { fetchAssets, policyAsset, Asset } from './lib/registry';
 import { getBalances, sync, fetchEsploraAsset, existDescriptor, EsploraAsset} from './lib/data';
 import FabDescriptor from './components/FabDescriptor';
+import SearchField from './components/SearchField';
+
+
+import RiveComponent from '@rive-app/react-canvas';
 
 function App() {
 
@@ -40,6 +44,7 @@ function App() {
   const [progress, setProgress] = useState(false);
   const [balances, setBalances] = useState(new Map<string, number>());
   const [tableAll, setTableAll] = useState(false);
+  const { height, width } = useWindowDimensions();
 
 
   // Delegate
@@ -182,29 +187,61 @@ function App() {
     loadFiltered()
   }, [stocks, searchTerm, tableAll]);
 
+  // window dimension functions
+  function getWindowDimensions() {
+    const { innerWidth: width, innerHeight: height } = window;
+    return {
+      width,
+      height
+    };
+  }
+  function useWindowDimensions() {
+    const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions());
+    useEffect(() => {
+      function handleResize() {
+        setWindowDimensions(getWindowDimensions());
+      }
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }, []);
+    return windowDimensions;
+  }//textfield customization
+
   return (
     <main className="App">
-      <Box maxWidth="md" sx={{ width: '100%' }}>
-      
-          <Avatar style={{ flex: 1 }}>
-            <img
-                            width={58}
-                            height={58}
-                            className="mantine-1trwvlz mantine-Avatar-image"
-                            src="https://liquid.net/_next/static/media/logo.28b5ba97.svg"
-                            alt=""
-                          />
-          </Avatar>
+      <Container style={{ width: '100%', padding: 0 }}>
+      <Box sx={{ width: '100%', height: 300 * width/623, minHeight: 300, marginTop:'-30%'}}>
+        <RiveComponent src="https://public.rive.app/hosted/113763/180277/uc54S_-h2UCFWpOo-aEkyg.riv" />
       </Box>
+
+      <Box maxWidth="md" sx={{ width: '100%', position: 'absolute', top: 24,left: 24, flexWrap: "wrap", display: 'flex'}}>
+        
+            <Avatar>
+              <img
+                              width={58}
+                              height={58}
+                              className="mantine-1trwvlz mantine-Avatar-image"
+                              src="https://liquid.net/_next/static/media/logo.28b5ba97.svg"
+                              alt=""
+                            />
+            </Avatar>
+
+        <TextField 
+              style={{ flex: 0.4, left: 24 }}
+              variant="standard"
+              placeholder="Search liquid asset"
+              value={searchTerm}
+              InputProps={{
+                style: { color: '#FFFFFF', borderBottom: "1px solid #ffffff",}
+              }}
+              onChange={handleSearchChange}
+            />
+
+        <FabDescriptor onRefresh={onRefresh}/>
+      </Box>
+      </Container>
       <Container maxWidth="md" sx={{ marginTop: 4, marginBottom: 8 }}>
       
-      <TextField 
-            sx={{ width: '100%' }}
-            variant="standard"
-            placeholder="Search liquid asset"
-            value={searchTerm}
-            onChange={handleSearchChange}
-          />
       <Box sx={{ width: '100%' }}>
         { progress ? <LinearProgress /> : '' }
       </Box>
@@ -213,9 +250,9 @@ function App() {
         <TableHead>
           <TableRow>
             <TableCell></TableCell>
-            <TableCell><Typography color="textSecondary" variant="overline">Name</Typography></TableCell>
-            <TableCell align="right"><Typography color="textSecondary" variant="overline">Price in BTC</Typography></TableCell>
-            <TableCell align="right"><Typography color="textSecondary" variant="overline">Market Cap</Typography></TableCell>
+            <TableCell padding='none'><Typography color="textSecondary" variant="overline">Name</Typography></TableCell>
+            <TableCell align="right" padding='none'><Typography color="textSecondary" variant="overline">Price in BTC</Typography></TableCell>
+            <TableCell align="right" padding='none'><Typography color="textSecondary" variant="overline">Market Cap</Typography></TableCell>
             <TableCell align="right">{balances.size > 0 && <Typography color="textSecondary" variant="overline">Balance</Typography>}</TableCell>
           </TableRow>
         </TableHead>
@@ -273,7 +310,6 @@ function App() {
           show all ...
         </Button>
 
-        <FabDescriptor onRefresh={onRefresh}/>
         </Container>
       </main>
   );
