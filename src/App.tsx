@@ -208,7 +208,7 @@ function App() {
 
   return (
     <main className="App">
-      <Container style={{ width: '100%', padding: 0 }}>
+      <Container style={{ width: '100%', padding: 0, margin: 0 }}>
       <Box sx={{ width: '100%', height: 300 * width/623, minHeight: 300, marginTop:'-30%'}}>
         <RiveComponent src="https://public.rive.app/hosted/113763/180277/uc54S_-h2UCFWpOo-aEkyg.riv" />
       </Box>
