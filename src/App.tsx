@@ -28,7 +28,6 @@ import { getSideswapMarket, getSideswapMarkets, Quote, Market } from './lib/side
 import { fetchAssets, policyAsset, Asset } from './lib/registry';
 import { getBalances, sync, fetchEsploraAsset, existDescriptor, EsploraAsset} from './lib/data';
 import FabDescriptor from './components/FabDescriptor';
-import SearchField from './components/SearchField';
 
 
 import RiveComponent from '@rive-app/react-canvas';
