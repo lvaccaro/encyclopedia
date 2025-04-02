@@ -23,9 +23,9 @@ export async function fetchAssets(): Promise<Asset[]> {
     //const allIcons: Map<string,(string|null)> = icons as unknown as Map<string,(string|null)>;
     //const allMetadatas: Map<string,(Metadata|null)> = metadatas as unknown as Map<string,(Metadata|null)>;
 
-    const res = await fetch("../assets/assets.minimal.json")
+    const res = await fetch("./assets/assets.minimal.json")
     const text = await res.json();
-    const res_metadata = await fetch("../assets/assets_metadatas.json")
+    const res_metadata = await fetch("./assets/assets_metadatas.json")
     const metadatas: Map<string,(Metadata|null)> = await res_metadata.json() as Map<string,(Metadata|null)>;
     const assets: Map<string,(string|number|null)[]> = text as unknown as Map<string,(string|number|null)[]>;
     const list: Asset[] = [];
