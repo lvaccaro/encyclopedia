@@ -43,7 +43,7 @@ module.exports  = (env, options) =>
   },
   plugins: [
     new CleanWebpackPlugin(),
-    //new CopyPlugin(copyPluginPatterns),
+    new CopyPlugin(),
     new HtmlWebpackPlugin({
       template: './src/index.html',
       inject: true,
