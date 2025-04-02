@@ -175,10 +175,10 @@ function App() {
   useEffect(() => {
     loadStocks();
     console.log("+++++++++++++++++++++")
-    //loadMarkets();
-    //if (existDescriptor()) {
-    //  loadBalances();
-    //}
+    loadMarkets();
+    if (existDescriptor()) {
+      loadBalances();
+    }
   }, []);
 
   useEffect(() => {

@@ -1,6 +1,7 @@
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 
 module.exports  = (env, options) => 
 {
@@ -32,7 +33,7 @@ module.exports  = (env, options) =>
       },  
       {
         test: /\.(ts|tsx|.js)$/,
-        exclude: /node_modules/,
+        exclude: [/node_modules/, /scripts/],
         use: 'babel-loader'
       },
       { test: /\.css$/, use: 'babel-loader' },

@@ -32,7 +32,7 @@ module.exports = (env, options) =>
       },  
       {
         test: /\.(ts|tsx|.js)$/,
-        exclude: /node_modules/,
+        exclude: [/node_modules/, /scripts/],
         use: 'babel-loader'
       },
       { test: /\.css$/, use: 'babel-loader' },
