@@ -165,15 +165,20 @@ function App() {
   const marketCapInTether = (id: string): number => {
     return marketCap(id) * 1/priceTether();
   }
-
+  const balanceInBitcoin = (id: string) => {
+    return balance(id) * price(id);
+  }
+  const balanceInTether = (id: string) => {
+    return balanceInBitcoin(id) * 1/priceTether();
+  }
   const balance = (id: string) => {
     const value = balances.get(id);
     if (value == undefined) {
-      return "";
+      return 0;
     }
     const asset = stocks.filter((asset) => asset.id == id)[0];
     if (asset == undefined) {
-      return "";
+      return 0;
     }
     const x = Number(value.toString());
     const y = x/(10**(asset.precision || 8));
@@ -261,7 +266,7 @@ function App() {
       
       <Box sx={{ width: '100%', display: 'flex' }}>
         { progress ? <LinearProgress /> : '' }
-        <FabPricing style={{justifyContent: 'right', flex: '1', marginRight: '0px'}} onRefresh={onPricingRefresh}></FabPricing>
+        <FabPricing className="" style={{justifyContent: 'right', flex: '1', marginRight: '0px'}} onRefresh={onPricingRefresh}></FabPricing>
       </Box>
       <TableContainer>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -269,9 +274,10 @@ function App() {
           <TableRow>
             <TableCell></TableCell>
             <TableCell padding='none'><Typography color="textSecondary" variant="overline">Name</Typography></TableCell>
-            <TableCell align="right" padding='none'><Typography color="textSecondary" variant="overline">Price</Typography></TableCell>
-            <TableCell align="right" padding='none'><Typography color="textSecondary" variant="overline">Market Cap</Typography></TableCell>
-            <TableCell align="right">{balances.size > 0 && <Typography color="textSecondary" variant="overline">Balance</Typography>}</TableCell>
+            {balances.size == 0 && <TableCell align="right" padding='none'><Typography color="textSecondary" variant="overline">Price</Typography></TableCell>}
+            {balances.size == 0 && <TableCell align="right" padding='none'><Typography color="textSecondary" variant="overline">MarketCap</Typography></TableCell>}
+            {balances.size > 0 && <TableCell align="right" padding='none'><Typography color="textSecondary" variant="overline">Value</Typography></TableCell>}
+            {balances.size > 0 && <TableCell align="right" padding='none'><Typography color="textSecondary" variant="overline">Balance</Typography></TableCell>}
           </TableRow>
         </TableHead>
         
@@ -299,6 +305,7 @@ function App() {
                   </Typography>
                 </Box>
               </TableCell>
+              { balances.size == 0 && 
               <TableCell align="right">
                 <Typography variant="h5">
                   { asset.id == policyAsset ? "1" : 
@@ -308,16 +315,34 @@ function App() {
                   })}
                 </Typography>
               </TableCell>
+              }
+              { balances.size == 0 && 
               <TableCell align="right">
                 <Typography variant="h5">
                 {minify( pricing ? marketCap(asset.id) : marketCapInTether(asset.id), { precision: 0 })}
                 </Typography>
               </TableCell>
+              }
+              { balances.size > 0 && 
               <TableCell align="right">
                 <Typography variant="h5">
-                {balance(asset.id).toString()}
+                  { minify( balance(asset.id), {
+                        precision: 10,
+                        lowercase: true,
+                  })}
                 </Typography>
               </TableCell>
+              }
+              { balances.size > 0 && 
+              <TableCell align="right">
+                <Typography variant="h5">
+                  { minify( pricing ? balanceInBitcoin(asset.id) : balanceInTether(asset.id), {
+                        precision: 10,
+                        lowercase: true,
+                  })}
+                </Typography>
+              </TableCell>
+              }
             </TableRow>
           )}
           )}
