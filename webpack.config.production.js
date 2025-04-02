@@ -46,7 +46,6 @@ module.exports  = (env, options) =>
     new CopyWebpackPlugin({patterns: [
       { from: "./public/assets", to: "assets" },
       { from: "./public/icons", to: "icons" },
-      { from: "./public", to: "." },
     ]}),
     new HtmlWebpackPlugin({
       template: './src/index.html',
