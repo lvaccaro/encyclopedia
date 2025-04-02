@@ -268,7 +268,7 @@ function App() {
                           width={50}
                           height={50}
                           className="mantine-1trwvlz mantine-Avatar-image"
-                          src={`../icons/${asset.id}.png`}
+                          src={`./icons/${asset.id}.png`}
                           alt=""
                         />}</Avatar>
               </TableCell>
