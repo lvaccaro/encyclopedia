@@ -29,6 +29,9 @@ jobs:
         run: yarn install --immutable
         shell: bash
 
+      - name: Fetch registry
+        run: node scripts/fetch.sh
+
       - name: Build
         run: yarn run build
 

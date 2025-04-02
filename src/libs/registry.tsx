@@ -1,9 +1,5 @@
 'use client'
 
-import assets from '../assets/liquid_assets.minimal.json';
-import icons from '../assets/liquid_icons.json';
-import metadatas from '../assets/liquid_metadatas.json';
-
 export const policyAsset = '6f0279e9ed041c3d710a9f57d0c02928416460c4b722ae3457a11eec381c526d';
 
 export class Metadata {
@@ -20,11 +16,18 @@ export class Asset {
     metadata: Metadata | undefined;
 }
 
-
 export async function fetchAssets(): Promise<Asset[]> {
+
+
     //const allAssets: Map<string,(string|number|null)[]> = assets as unknown as Map<string,(string|number|null)[]>;
     //const allIcons: Map<string,(string|null)> = icons as unknown as Map<string,(string|null)>;
     //const allMetadatas: Map<string,(Metadata|null)> = metadatas as unknown as Map<string,(Metadata|null)>;
+
+    const res = await fetch("../../assets.minimal.json")
+    const text = await res.json();
+    const res_metadata = await fetch("../../assets_metadatas.json")
+    const metadatas: Map<string,(Metadata|null)> = await res_metadata.json() as Map<string,(Metadata|null)>;
+    const assets: Map<string,(string|number|null)[]> = text as unknown as Map<string,(string|number|null)[]>;
     const list: Asset[] = [];
     for (const a of Object.entries(assets)) {
         const asset = new Asset();
@@ -37,11 +40,12 @@ export async function fetchAssets(): Promise<Asset[]> {
             if (m[0] == a[0]) {
                 asset.metadata = m[1] as Metadata
             }
-        }for (const i of Object.entries(icons)) {
-            if (i[0] == a[0]) {
-                asset.icon = i[1] as string
-            }
         }
+        //for (const i of Object.entries(icons)) {
+        //    if (i[0] == a[0]) {
+        //        asset.icon = i[1] as string
+        //    }
+        //}
         list.push(asset)
     }
     //for (const a of Object.entries(allIcons)) {

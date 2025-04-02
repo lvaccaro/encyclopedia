@@ -13,7 +13,7 @@ import Fab from '@mui/material/Fab';
 import KeyIcon from '@mui/icons-material/Key';
 import KeyOffIcon from '@mui/icons-material/KeyOff';
 
-import {getDescriptor, setDescriptor, existDescriptor, removeDescriptor} from '../lib/data';
+import {getDescriptor, setDescriptor, existDescriptor, removeDescriptor} from '../libs/data';
 
 const FabDescriptor = (props: any) => {
   const onRefresh = props.onRefresh;

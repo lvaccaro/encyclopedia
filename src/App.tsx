@@ -24,9 +24,9 @@ import {
 import { withStyles } from "@mui/material/styles";
 
 
-import { getSideswapMarket, getSideswapMarkets, Quote, Market } from './lib/sideswap';
-import { fetchAssets, policyAsset, Asset } from './lib/registry';
-import { getBalances, sync, fetchEsploraAsset, existDescriptor, EsploraAsset} from './lib/data';
+import { getSideswapMarket, getSideswapMarkets, Quote, Market } from './libs/sideswap';
+import { fetchAssets, policyAsset, Asset } from './libs/registry';
+import { getBalances, sync, fetchEsploraAsset, existDescriptor, EsploraAsset} from './libs/data';
 import FabDescriptor from './components/FabDescriptor';
 
 
@@ -175,10 +175,10 @@ function App() {
   useEffect(() => {
     loadStocks();
     console.log("+++++++++++++++++++++")
-    loadMarkets();
-    if (existDescriptor()) {
-      loadBalances();
-    }
+    //loadMarkets();
+    //if (existDescriptor()) {
+    //  loadBalances();
+    //}
   }, []);
 
   useEffect(() => {
@@ -264,11 +264,11 @@ function App() {
               sx={{ '&:last-child td': { border: 0 } , '&:last-child th': { border: 0 } }}
             >
               <TableCell component="th" scope="row">
-                <Avatar>{asset.icon && <img
+                <Avatar>{<img
                           width={50}
                           height={50}
                           className="mantine-1trwvlz mantine-Avatar-image"
-                          src={`data:image/jpeg;base64,${asset.icon}`}
+                          src={`../icons/${asset.id}.png`}
                           alt=""
                         />}</Avatar>
               </TableCell>
