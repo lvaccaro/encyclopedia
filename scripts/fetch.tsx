@@ -1,4 +1,4 @@
-import { promises } from 'fs'
+import { promises, existsSync, mkdirSync } from 'fs'
 
 const testnet = false;
 const repo = testnet ? "asset_registry_testnet_db" : "asset_registry_db";
@@ -7,7 +7,10 @@ const icon = github + "/raw/master/icons.json"
 const assets_minimal = github + "/raw/master/index.minimal.json"
 
 async function fetch_icons() {
-    console.log("icon: ", icon)
+    console.log("icon: ", icon);
+    if (!existsSync("./public/icons/")){
+        mkdirSync("./public/icons/");
+    }
     const res =  await fetch(icon);
     const icons = await res.json();
     for (const id in icons) {
