@@ -25,10 +25,10 @@ import { withStyles } from "@mui/material/styles";
 
 
 import { getSideswapMarket, getSideswapMarkets, Quote, Market } from './libs/sideswap';
-import { fetchAssets, policyAsset, Asset } from './libs/registry';
+import { fetchAssets, policyAsset, Asset, tether } from './libs/registry';
 import { getBalances, sync, fetchEsploraAsset, existDescriptor, EsploraAsset} from './libs/data';
 import FabDescriptor from './components/FabDescriptor';
-
+import FabPricing from './components/FabPricing';
 
 import RiveComponent from '@rive-app/react-canvas';
 
@@ -43,6 +43,7 @@ function App() {
   const [progress, setProgress] = useState(false);
   const [balances, setBalances] = useState(new Map<string, number>());
   const [tableAll, setTableAll] = useState(false);
+  const [pricing, setPricing] = useState(true);
   const { height, width } = useWindowDimensions();
 
 
@@ -55,6 +56,11 @@ function App() {
       setBalances(new Map<string, number>());
     }
   };
+
+  const onPricingRefresh = async (bitcoin: boolean) => {
+    console.log("pricing refreshing", bitcoin);
+    setPricing(bitcoin);
+  }
 
   // Loading functions
   async function loadBalances() {
@@ -130,6 +136,14 @@ function App() {
     }
   };
 
+  const priceTether = (): number => {
+    return price(tether)
+  }
+
+  const priceInTether = (id: string): number => {
+    return price(id) * 1/priceTether();
+  }
+
   const marketCap = (id: string): number => {
     const asset = esploraAssets.filter((asset) => asset.asset_id == id)[0];
     if (asset == undefined) {
@@ -148,6 +162,9 @@ function App() {
     console.log("marketCap",id,asset,value,amount,res);
     return res;
   };
+  const marketCapInTether = (id: string): number => {
+    return marketCap(id) * 1/priceTether();
+  }
 
   const balance = (id: string) => {
     const value = balances.get(id);
@@ -235,14 +252,16 @@ function App() {
               }}
               onChange={handleSearchChange}
             />
-
-        <FabDescriptor onRefresh={onRefresh}/>
+            <div style={{position: 'absolute', right: '40px'}}>
+            <FabDescriptor onRefresh={onRefresh}/>
+            </div>
       </Box>
       </Container>
       <Container maxWidth="md" sx={{ marginTop: 4, marginBottom: 8 }}>
       
-      <Box sx={{ width: '100%' }}>
+      <Box sx={{ width: '100%', display: 'flex' }}>
         { progress ? <LinearProgress /> : '' }
+        <FabPricing style={{justifyContent: 'right', flex: '1', marginRight: '0px'}} onRefresh={onPricingRefresh}></FabPricing>
       </Box>
       <TableContainer>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -250,7 +269,7 @@ function App() {
           <TableRow>
             <TableCell></TableCell>
             <TableCell padding='none'><Typography color="textSecondary" variant="overline">Name</Typography></TableCell>
-            <TableCell align="right" padding='none'><Typography color="textSecondary" variant="overline">Price in BTC</Typography></TableCell>
+            <TableCell align="right" padding='none'><Typography color="textSecondary" variant="overline">Price</Typography></TableCell>
             <TableCell align="right" padding='none'><Typography color="textSecondary" variant="overline">Market Cap</Typography></TableCell>
             <TableCell align="right">{balances.size > 0 && <Typography color="textSecondary" variant="overline">Balance</Typography>}</TableCell>
           </TableRow>
@@ -282,7 +301,8 @@ function App() {
               </TableCell>
               <TableCell align="right">
                 <Typography variant="h5">
-                  { asset.id == policyAsset ? "1" : minify(price(asset.id), {
+                  { asset.id == policyAsset ? "1" : 
+                  minify( pricing ? price(asset.id) : priceInTether(asset.id), {
                         precision: 10,
                         lowercase: true,
                   })}
@@ -290,7 +310,7 @@ function App() {
               </TableCell>
               <TableCell align="right">
                 <Typography variant="h5">
-                {minify(marketCap(asset.id), { precision: 0 })}
+                {minify( pricing ? marketCap(asset.id) : marketCapInTether(asset.id), { precision: 0 })}
                 </Typography>
               </TableCell>
               <TableCell align="right">

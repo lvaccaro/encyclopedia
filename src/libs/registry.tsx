@@ -1,6 +1,7 @@
 'use client'
 
 export const policyAsset = '6f0279e9ed041c3d710a9f57d0c02928416460c4b722ae3457a11eec381c526d';
+export const tether = 'ce091c998b83c78bb71a632313ba3760f1763d9cfcffae02258ffa9865a37bd2';
 
 export class Metadata {
     stablecoin: boolean = false;
@@ -17,12 +18,6 @@ export class Asset {
 }
 
 export async function fetchAssets(): Promise<Asset[]> {
-
-
-    //const allAssets: Map<string,(string|number|null)[]> = assets as unknown as Map<string,(string|number|null)[]>;
-    //const allIcons: Map<string,(string|null)> = icons as unknown as Map<string,(string|null)>;
-    //const allMetadatas: Map<string,(Metadata|null)> = metadatas as unknown as Map<string,(Metadata|null)>;
-
     const res = await fetch("./assets/assets.minimal.json")
     const text = await res.json();
     const res_metadata = await fetch("./assets/assets_metadatas.json")
@@ -41,16 +36,7 @@ export async function fetchAssets(): Promise<Asset[]> {
                 asset.metadata = m[1] as Metadata
             }
         }
-        //for (const i of Object.entries(icons)) {
-        //    if (i[0] == a[0]) {
-        //        asset.icon = i[1] as string
-        //    }
-        //}
         list.push(asset)
     }
-    //for (const a of Object.entries(allIcons)) {
-    //    asset.icon = allIcons.get(a[0]) as string || undefined 
-    //    asset.metadata = allMetadatas.get(a[0]) as Metadata || undefined 
-    //}
     return list;
   }

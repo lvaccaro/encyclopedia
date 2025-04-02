@@ -58,7 +58,6 @@ const FabDescriptor = (props: any) => {
       <Fab
         color="primary"
         aria-label="watch"
-        style={{ position: 'fixed', top: 16, right: 16 }}
         onClick={handleClickOpen}
       >
         {logged ? <KeyOffIcon /> : <KeyIcon />}
