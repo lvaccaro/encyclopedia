@@ -1,0 +1,50 @@
+
+export class EsploraAssetChainStats {
+  issued_amount: number | undefined;
+  burned_amount: number | undefined;
+  peg_in_amount: number | undefined;
+  peg_out_amount: number | undefined;
+  has_blinded_issuances: boolean | undefined;
+}
+export class EsploraAsset {
+  asset_id!: string
+  chain_stats: EsploraAssetChainStats | undefined;
+  precision: number | undefined;
+  name: string | undefined;
+  ticker: string | undefined;
+}
+const base_url = "https://blockstream.info/liquid/api/asset/"
+
+export const fetchEsploraAssets = async (remote: boolean, asset: string): Promise<any> => {
+  if (remote) {
+    return await (await fetch(`${base_url}/${asset}`)).json();
+  } else {
+    return await (await fetch("")).json();
+  }
+};
+export async function loadEsploraAsset(assetId: string): Promise<EsploraAsset> {
+  if (localStorage.getItem(assetId) === null) {
+    console.log("Cache miss for asset: ", assetId);
+    const asset = await fetchEsploraAssets(true, assetId);
+    if (asset !== null && asset !== undefined) {
+      console.log("Fetch asset: ", asset);
+      localStorage.setItem(assetId, JSON.stringify(asset));
+      return asset as EsploraAsset;
+    }
+    console.log("Error fetching asset: ", assetId);
+    return Promise.reject("Error fetching asset");
+  } else {
+    console.log("Cache hit for asset: ", JSON.parse(localStorage.getItem(assetId)!));
+    return Promise.resolve(JSON.parse(localStorage.getItem(assetId)!));
+  }
+}
+export async function loadEsploraAssets(assetIds: string[]): Promise<Map<string, EsploraAsset>> {
+  const assets = new Map<string, EsploraAsset>();
+  for (const assetId of assetIds) {
+    const asset = await loadEsploraAsset(assetId);
+    if (asset !== null && asset !== undefined) {
+      assets.set(assetId, asset);
+    }
+  }
+  return assets;
+}

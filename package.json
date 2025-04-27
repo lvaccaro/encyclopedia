@@ -1,0 +1,75 @@
+{
+  "name": "Encyclopedia",
+  "version": "0.1.0",
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^7.0.1",
+    "@mui/material": "^7.0.1",
+    "@mui/styles": "^6.4.8",
+    "@rive-app/react-canvas": "^4.18.5",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.126",
+    "@types/react": "^19.0.12",
+    "@types/react-dom": "^19.0.4",
+    "eslint": "^9.25.1",
+    "lwk_wasm": "^0.9.0",
+    "millify": "^6.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.5.0",
+    "react-scripts": "5.0.1",
+    "typescript-eslint": "^8.31.0",
+    "websocket": "^1.0.35",
+    "ws": "^8.18.1"
+  },
+  "scripts": {
+    "dev": "webpack serve --mode development --history-api-fallback --progress --hot --config ./webpack.config.development.js",
+    "build": "rm -rf ./dist && webpack --config webpack.config.production.js --mode=production",
+    "typecheck": "tsc",
+    "lint": "eslint \"src/*.{tsx}\""
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
+  "devDependencies": {
+    "@babel/core": "^7.26.10",
+    "@babel/plugin-transform-runtime": "^7.26.10",
+    "@babel/preset-env": "^7.26.9",
+    "@babel/preset-react": "^7.26.3",
+    "@babel/preset-typescript": "^7.27.0",
+    "@babel/runtime": "^7.27.0",
+    "@tailwindcss/postcss": "^4.0.17",
+    "babel-loader": "^10.0.0",
+    "clean-webpack-plugin": "^4.0.0",
+    "copy-webpack-plugin": "^13.0.0",
+    "html-webpack-plugin": "^5.6.3",
+    "tailwindcss": "^4.0.17",
+    "typescript": "^5.8.2",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.1"
+  },
+  "exports": {
+    ".": {
+      "import": "./build/release.js",
+      "types": "./build/release.d.ts"
+    }
+  }
+}

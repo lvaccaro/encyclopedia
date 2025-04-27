@@ -1,0 +1,42 @@
+.rive {
+    position:'absolute';
+    height: '100%';
+    width: '100%';
+    all: 'unset';
+    top:'-30%';
+}
+img[src=""] {
+    display: none;
+}
+img {  
+    position: relative;
+  }
+
+img.img-logo[alt]:after {  
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    font-family: 'Helvetica';
+    font-weight: 300;
+    line-height: 2;  
+    text-align: center;
+    content: attr(alt);
+    background-image: url("/media/logo.28b5ba97.svg");
+  }
+img[alt]:after {  
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    font-family: 'Helvetica';
+    font-weight: 300;
+    line-height: 2;  
+    text-align: center;
+    content: attr(alt);
+  }

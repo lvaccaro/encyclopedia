@@ -1,0 +1,324 @@
+.GovernanceModal_memberModalContainer__jHPFQ {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 35px;
+  }
+  .GovernanceModal_memberModalContainer__jHPFQ h2 {
+    color: #22e1c9;
+    text-align: center;
+  }
+  .GovernanceModal_memberCard__lA0kx {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .GovernanceModal_membersList__7iYKE {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 24px;
+    max-width: 700px;
+    padding: 0 50px;
+  }
+  .GovernanceModal_membersList__7iYKE a:hover {
+    text-decoration: underline;
+  }
+  .GovernanceModal_membersList__7iYKE img {
+    -webkit-mask-image: radial-gradient(
+      circle,
+      #fff 66%,
+      hsla(0, 0%, 100%, 0) 67%
+    );
+    mask-image: radial-gradient(circle, #fff 66%, hsla(0, 0%, 100%, 0) 67%);
+  }
+  .Modal_modalOuter__6pdvr {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    transition: 0.3s;
+    scrollbar-color: transparent transparent;
+    scrollbar-width: thin;
+    background: rgba(14, 1, 45, 0.816);
+  }
+  .Modal_modalOuter__6pdvr .Modal_modalContainer__87Zbj {
+    position: relative;
+    z-index: 1001;
+    transition: 0.3s;
+    background-color: #0e012d;
+    border-radius: 8px;
+    box-shadow: 0 0 30px hsla(0, 0%, 100%, 0.188);
+    overflow-y: auto;
+    box-sizing: border-box;
+    max-height: 100%;
+    padding: 40px;
+  }
+  .Modal_modalOuter__6pdvr .Modal_modalContainer__87Zbj .Modal_modalClose__LpwmM {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+  }
+  .Modal_modalOuter__6pdvr
+    .Modal_modalContainer__87Zbj
+    .Modal_modalClose__LpwmM:hover {
+    cursor: pointer;
+  }
+  .Modal_modalOuter__6pdvr
+    .Modal_modalContainer__87Zbj
+    .Modal_modalClose__LpwmM
+    svg {
+    height: 40px;
+    width: 40px;
+    stroke: #d0d0d0;
+    z-index: 1001;
+  }
+  @media only screen and (max-width: 475px) {
+    .Modal_modalOuter__6pdvr
+      .Modal_modalContainer__87Zbj
+      .Modal_modalClose__LpwmM
+      svg {
+      height: 30px;
+      width: 30px;
+    }
+  }
+  .Modal_modalOuter__6pdvr
+    .Modal_modalContainer__87Zbj
+    .Modal_modalClose__LpwmM
+    svg
+    line {
+    stroke-width: 8;
+    stroke-linecap: round;
+  }
+  .Modal_modalOuter__6pdvr
+    .Modal_modalContainer__87Zbj
+    .Modal_modalClose__LpwmM
+    svg
+    circle {
+    stroke-width: 4;
+    fill: none;
+  }
+  .Modal_modalOuter__6pdvr
+    .Modal_modalContainer__87Zbj
+    .Modal_modalClose__LpwmM
+    svg:hover {
+    stroke: #fff;
+  }
+  .Modal_modalOuter__6pdvr.Modal_hidden__UQBDI {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .Modal_modalOuter__6pdvr.Modal_hidden__UQBDI .Modal_modalContainer__87Zbj {
+    transform: translateY(-200px);
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 80px 0;
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw
+    .FederationGraph_imgContainer__VMyFZ
+    > svg {
+    max-width: 100%;
+    height: 100%;
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw > ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw > ul li {
+    position: relative;
+    padding-left: 1.5em;
+    line-height: 1.6;
+    font-size: 18px;
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw > ul li:hover {
+    cursor: pointer;
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw > ul li:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.5em;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1px solid transparent;
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw
+    > ul
+    .FederationGraph_functionary__c5x_T:before {
+    background-color: #22e1c9;
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw
+    > ul
+    .FederationGraph_federation__U_DMX:before {
+    background-color: #2170e6;
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw
+    > ul
+    .FederationGraph_membership__fHT62:before {
+    background-color: #f0d003;
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw
+    > ul
+    .FederationGraph_oversight__SMBP0:before {
+    background-color: #8f21e6;
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw
+    > ul
+    .FederationGraph_technology__sQvVD:before {
+    background-color: #f09103;
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw
+    > ul
+    .FederationGraph_fullnodes__Eo1ha:before {
+    background-color: #006c7f;
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw
+    > ul.FederationGraph_functionaryHighlighted__L5MMu
+    .FederationGraph_functionary__c5x_T {
+    color: #22e1c9;
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw
+    > ul.FederationGraph_functionaryHighlighted__L5MMu
+    .FederationGraph_functionary__c5x_T:before {
+    border: 2px solid #fff;
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw
+    > ul.FederationGraph_federationHighlighted__ZESjH
+    .FederationGraph_federation__U_DMX {
+    color: #2170e6;
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw
+    > ul.FederationGraph_federationHighlighted__ZESjH
+    .FederationGraph_federation__U_DMX:before {
+    border: 2px solid #fff;
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw
+    > ul.FederationGraph_membershipBoardHighlighted__sWFhn
+    .FederationGraph_membership__fHT62 {
+    color: #f0d003;
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw
+    > ul.FederationGraph_membershipBoardHighlighted__sWFhn
+    .FederationGraph_membership__fHT62:before {
+    border: 2px solid #fff;
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw
+    > ul.FederationGraph_oversightBoardHighlighted__Cnjeg
+    .FederationGraph_oversight__SMBP0 {
+    color: #8f21e6;
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw
+    > ul.FederationGraph_oversightBoardHighlighted__Cnjeg
+    .FederationGraph_oversight__SMBP0:before {
+    border: 2px solid #fff;
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw
+    > ul.FederationGraph_technologyBoardHighlighted__BToHq
+    .FederationGraph_technology__sQvVD {
+    color: #f09103;
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw
+    > ul.FederationGraph_technologyBoardHighlighted__BToHq
+    .FederationGraph_technology__sQvVD:before {
+    border: 2px solid #fff;
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw
+    > ul.FederationGraph_fullnodesHighlighted__jJhQs
+    .FederationGraph_fullnodes__Eo1ha {
+    color: #006c7f;
+  }
+  .FederationGraph_liquidFederationGraph__0IOQw
+    > ul.FederationGraph_fullnodesHighlighted__jJhQs
+    .FederationGraph_fullnodes__Eo1ha:before {
+    border: 2px solid #fff;
+  }
+  .FederationGraph_federationHighlighted__ZESjH
+    .FederationGraph_federationMembers__pLCRK,
+  .FederationGraph_functionaryHighlighted__L5MMu
+    .FederationGraph_functionaryOperators__K2xNa,
+  .FederationGraph_membershipBoardHighlighted__sWFhn
+    .FederationGraph_membershipBoard__gGRtX
+    rect,
+  .FederationGraph_oversightBoardHighlighted__Cnjeg
+    .FederationGraph_oversightBoard__i3NS8
+    rect,
+  .FederationGraph_technologyBoardHighlighted__BToHq
+    .FederationGraph_technologyBoard__k8nSH
+    rect {
+    stroke: #fff;
+    stroke-width: 20;
+  }
+  .FederationGraph_fullnodesHighlighted__jJhQs .FederationGraph_fullNodes__3mP0I {
+    stroke: #fff;
+    stroke-width: 10;
+  }
+  .FederationGraph_federationHighlighted__ZESjH
+    .FederationGraph_federationMembers__pLCRK,
+  .FederationGraph_fullnodesHighlighted__jJhQs .FederationGraph_fullNodes__3mP0I,
+  .FederationGraph_functionaryHighlighted__L5MMu
+    .FederationGraph_functionaryOperators__K2xNa,
+  .FederationGraph_membershipBoardHighlighted__sWFhn
+    .FederationGraph_membershipBoard__gGRtX,
+  .FederationGraph_oversightBoardHighlighted__Cnjeg
+    .FederationGraph_oversightBoard__i3NS8,
+  .FederationGraph_technologyBoardHighlighted__BToHq
+    .FederationGraph_technologyBoard__k8nSH {
+    animation: FederationGraph_pop__v7ez7 0.3s ease-out;
+    transform-origin: center;
+  }
+  @keyframes FederationGraph_pop__v7ez7 {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+  @keyframes FederationGraph_pop2__q_mbA {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+  .FederationGraph_allPop__SB0ZK .FederationGraph_centerText__Od5TL {
+    animation: FederationGraph_pop2__q_mbA 0.3s ease-out 0s;
+    transform-origin: center;
+  }
+  .FederationGraph_allPop__SB0ZK .FederationGraph_functionaryOperators__K2xNa {
+    animation: FederationGraph_pop2__q_mbA 0.4s ease-out 0.1s;
+    transform-origin: center;
+  }
+  .FederationGraph_allPop__SB0ZK .FederationGraph_federationMembers__pLCRK {
+    animation: FederationGraph_pop2__q_mbA 0.5s ease-out 0.1s;
+    transform-origin: center;
+  }
+  .FederationGraph_allPop__SB0ZK .FederationGraph_membershipBoard__gGRtX,
+  .FederationGraph_allPop__SB0ZK .FederationGraph_oversightBoard__i3NS8,
+  .FederationGraph_allPop__SB0ZK .FederationGraph_technologyBoard__k8nSH {
+    animation: FederationGraph_pop2__q_mbA 0.6s ease-out 0.1s;
+    transform-origin: center;
+  }
+  .FederationGraph_allPop__SB0ZK .FederationGraph_fullNodes__3mP0I {
+    animation: FederationGraph_pop2__q_mbA 0.7s ease-out 0.1s;
+    transform-origin: center;
+  }
+  
