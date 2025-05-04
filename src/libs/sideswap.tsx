@@ -1,4 +1,5 @@
-'use client'
+
+// MODELS
 
 export class AssetPair {
   base!: string;
@@ -20,6 +21,7 @@ export class Quote {
   high!: number;
   low!: number;
   open!: number;
+  volume!: number;
   time!: string;
   asset_pair: AssetPair | undefined;
 };
@@ -39,150 +41,168 @@ export class Price {
   ind_price: number | undefined;
   last_price: number | undefined;
 }
-let index = 0;
 
-type DelegatePrice = (price: Price) => (void);
-const WebSock = global.WebSocket || global.MozWebSocket || require('ws');
-const ws = new WebSock('wss://api.sideswap.io/json-rpc-ws');
+export type DelegatePrice = (price: Price) => (void);
 
-async function wsSubscribe(request: any, subscribe: DelegatePrice) {
-  if (ws.readyState !== WebSock.OPEN) {
-    return
+// WEBSOCKET
+
+  const wsUrl = 'wss://api.sideswap.io/json-rpc-ws';
+  var isConnected = false;
+  var messageCallbacks: Record<string, (message: any) => void> = {};
+  var subscribeCallbacks: Record<string, (message: any) => void> = {};
+  var nextMessageId = 0;
+
+  const websocket = new WebSocket(wsUrl);
+
+    websocket.onopen = () => {
+      console.log('WebSocket connected');
+      isConnected = true;
+    };
+
+    websocket.onclose = () => {
+      console.log('WebSocket disconnected');
+      isConnected = false;
+      // Consider adding reconnection logic here
+    };
+
+    websocket.onmessage = (event: any) => {
+      try {
+        const message = JSON.parse(event.data);
+        // Assuming the server includes a 'correlationId' in the response
+        if (message && message.id && messageCallbacks[message.id]) {
+          messageCallbacks[message.id](message);
+          delete messageCallbacks[message.id]; // Clean up the callback
+        } else if (message && subscribeCallbacks[message.method]){
+          subscribeCallbacks[message.method](message);
+        } else {
+          console.log('Received unhandled message:', message);
+        }
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
+    };
+
+    websocket.onerror = (error: any) => {
+      console.error('WebSocket error:', error);
+    };
+
+const sendMessage = async (method: string, params: any) => {
+  if (!isConnected || !websocket || websocket.readyState !== WebSocket.OPEN) {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    return sendMessage(method, params);
   }
-  ws.onmessage = (event:any) => {
-    console.log('Message received:', event.data);
-    const pkg = JSON.parse(event.data.toString());
-    const price = pkg.params?.market_price as Price;
-    if (price != null) {
-      subscribe(price);
+    return new Promise((resolve, reject) => {
+      const messageId = `${nextMessageId++}`;
+      const messageToSend = JSON.stringify({
+        method: method,
+        params: params,
+        id: messageId, // Include a correlation ID
+      });
+
+      messageCallbacks[messageId] = resolve; // Store the resolve function
+
+      try {
+        websocket.send(messageToSend);
+      } catch (error) {
+        delete messageCallbacks[messageId]; // Clean up on send error
+        reject(error);
+      }
+    });
+  };
+
+const subscribe = async (method: string, params: any, callback:(message: any) => void) => {
+  if (!isConnected || !websocket || websocket.readyState !== WebSocket.OPEN) {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    return subscribe(method, params, callback);
+  }
+    const messageId = `${nextMessageId++}`;
+    const subscribeMessage = JSON.stringify({  
+        id: messageId, // Include a correlation ID
+        method: method,
+        params: params 
+    });
+    subscribeCallbacks[method] = callback; // Store the resolve function
+    try {
+      websocket.send(subscribeMessage);
+    } catch (error) {
+      delete subscribeCallbacks[method]; // Clean up on send error
     }
   };
-  console.log('Message send:', request);
-  ws.send(JSON.stringify(request));
-};
 
-
-async function wsSendWaitRecv(request: any): Promise<any> {
-  return new Promise((resolve, reject) => {
-    if (ws.readyState !== WebSock.OPEN) {
-      reject("WebSocket not connected")
-      return
-    }
-    ws.onmessage = (event:any) => {
-      console.log('Message received:', event.data);
-      const pkg = JSON.parse(event.data.toString());
-      if (pkg.id != index) {
-        reject("Error");
-        return
-      }
-      index += 1;
-      resolve(pkg);
-    };
-    console.log('Message send:', request);
-    ws.send(JSON.stringify(request));
-  });
-}
-  
-export const connectSideswap = async (): Promise<void> => {
-  console.log('Connecting WebSocket connection');
-  return new Promise((resolve, reject) => {
-    if (ws.readyState === WebSock.OPEN) {
-      console.log('WebSocket already connected');
-      resolve();
+const unsubscribe = (method: string, params: any) => {
+    if (!isConnected || !websocket || websocket.readyState !== WebSocket.OPEN) {
+      console.error('WebSocket is not connected. Cannot unsubscribe.');
       return;
     }
-    ws.onopen = () => {
-      console.log('Connected to WebSocket');
-      resolve();
-    };
-    ws.onerror = (error:any) => {
-      console.error('WebSocket error:', error);
-      reject(error);
-    };
-    ws.onclose = () => {
-      console.log('WebSocket connection closed');
-    };
-  });
-}
+    const messageId = `${nextMessageId++}`;
+    const unsubscribeMessage = JSON.stringify({
+        id: messageId, // Include a correlation ID 
+        method: method, 
+        params: params });
+    delete subscribeCallbacks[method]; // Clean up on send error
+    websocket.send(unsubscribeMessage);
+  };
 
-export const closeSideswap = async (): Promise<void> => {
-  console.log('Closing WebSocket connection');
-  ws.close();
-}
+
+// SIDESWAP METHODS\
 
 export const fetchSideswapAssets = async (): Promise<Asset[]> => {
-  const request = {
-    "id": index,
-    "method": "assets",
-    "params": {
-      "all_assets": true,
-      "embedded_icons": false,
-    }
-  };
-  console.log('request:', request);
-  const res = await wsSendWaitRecv(request);
-  return res.result.assets as Asset[];
+  const res = await sendMessage('assets', { "all_assets": true, "embedded_icons": false }) as { result: { assets: Asset[] }};
+  console.log('Data Response:', res);
+  return res.result.assets;
 };
-
 export const fetchSideswapMarkets = async (): Promise<Market[]> => {
-  const request = {
-    "id": index,
-    "method": "market",
-    "params": {
-      "list_markets": {}
-    }
-  };
-  console.log('request:', request);
-  const res = await wsSendWaitRecv(request);
+  const res = await sendMessage('market', {"list_markets": {}}) as { result: { list_markets: {markets: Market[] }}};
+  console.log('Data Response:', res);
   return res.result.list_markets.markets as Market[];
 };
-  
-export const fetchSideswapMarket = async (base: string, quote: string): Promise<Quote> => {
-  const request = {
-    "id": index,
-    "method": "market",
-    "params": {
-      "chart_sub": {
-        "asset_pair": {
-          "base": base,
-          "quote": quote
-        }
-      }
-    }
-  };
-  console.log('request:', request);
-  const res = await wsSendWaitRecv(request);
-  const quotes = res.result.chart_sub.data.reverse()[0] as Quote;
-  if (quotes == null) {
-    console.log("Error: no quotes");
-    return quotes;
-  }
-  quotes.asset_pair = new AssetPair(base, quote);
-  return quotes;
+export const fetchSideswapMarket = async (base: string, quote: string): Promise<Quote[]> => {
+  const res = await sendMessage('market', {"chart_sub": {"asset_pair": {"base":base,"quote":quote}}}) as { result: { chart_sub: {data: Quote[] }}};
+  console.log('Data Response:', res);
+  return res.result.chart_sub.data as Quote[];
 };
 
-export const subscribeSideswapPrice = async (base: string, quote: string, delegate: DelegatePrice) => {
-  const request = {
-    "id": index,
-    "method": "market",
-    "params": {
+export const fetchSideswapSubscribePrice = async (base: string, quote: string, callback: DelegatePrice) => {
+    const params = {
       "subscribe": {
-        "asset_pair": {
-          "base": base,
-          "quote": quote
+          "asset_pair": {
+            "base": base,
+            "quote": quote
+          }
         }
+      };
+    subscribe("market", params, (msg) => {
+      console.log('msg');
+      console.log(msg);
+      if (msg.params?.market_price) {
+        callback(msg.params?.market_price as Price)
       }
-    }
-  };
-  const res = await wsSubscribe(request, delegate)
-}
+    });
+ };
 
-export const localSideswapAssets = async (): Promise<Asset[]> => {
-  const res = await fetch("/assets/sideswap_assets.json")
-  return await res.json() as Asset[];
-};
-  
-export const localSideswapMarkets = async (): Promise<Market[]> => {
-  const res = await fetch("/assets/sideswap_markets.json")
-  return await res.json() as Market[];
-};
+/*
+  return (
+    <div>
+      <p>WebSocket Status: {isConnected ? 'Connected' : 'Disconnected'}</p>
+      {isConnected && (
+        <div>
+          <button onClick={() => sendMessage('assets', { "all_assets": true, "embedded_icons": false }).then(response => console.log('Data Response:', response)).catch(error => console.error('Send Error:', error))}>
+          fetch Sideswap Assets
+          </button>
+          <button onClick={() => sendMessage('market', { "list_markets": {} }).then(response => console.log('Data Response:', response)).catch(error => console.error('Send Error:', error))}>
+          fetch Sideswap Markets
+          </button>
+          <button onClick={() => sendMessage('market', { "chart_sub": { "asset_pair": {"base":base,"quote":quote}} }).then(response => console.log('Data Response:', response)).catch(error => console.error('Send Error:', error))}>
+          fetch Sideswap Market lbtc/usdt
+          </button>
+          <button onClick={() => subscribe('market', {"subscribe": {"asset_pair": {"base":base,"quote":quote}}})}>
+            Subscribe to Notifications
+            </button>
+          <button onClick={() => unsubscribe('market', {"subscribe": {"asset_pair": {"base":base,"quote":quote}}})}>
+            Unsubscribe from Price
+        </button>
+        </div>
+      )}
+    </div>
+  );
+*/

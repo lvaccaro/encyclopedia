@@ -1,16 +1,11 @@
-import logo from './logo.svg';
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link, useNavigation } from 'react-router-dom';
-import { createTheme, ThemeProvider, createStyles } from '@mui/material/styles';
-import TextField from '@mui/material/TextField';
-import LinearProgress from '@mui/material/LinearProgress';
+import RiveComponent from '@rive-app/react-canvas';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import moment from 'moment';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Button from '@mui/material/Button';
-import AppBar from '@mui/material/AppBar';
-import SendIcon from '@mui/icons-material/Send';
-import ButtonGroup from '@mui/material/ButtonGroup';
 import millify from "millify";
-//import Image from "next/image";
 import {
   Container,
   Table,
@@ -24,18 +19,27 @@ import {
   Typography,
   Box,
 } from '@mui/material';
-import { localSideswapAssets, localSideswapMarkets, Quote as SideswapQuote, Market as SideswapMarket, Asset as SideswapAsset, connectSideswap, subscribeSideswapPrice, Price as SideswapPrice, Price } from '../libs/sideswap';
+
 import { fetchAssets, policyAsset, Asset, tether } from '../libs/registry';
 import { loadStokrAssets, StokrAsset } from '../libs/stokr';
 import { loadBitfinexSecurities, loadBitfinexTickers, BitfinexTicker } from '../libs/bitfinex';
-import { EsploraAsset, loadEsploraAsset, loadEsploraAssets } from '../libs/esplora';
-import RiveComponent from '@rive-app/react-canvas';
+import { EsploraAsset, loadEsploraAssetTxs, loadEsploraAssets } from '../libs/esplora';
 import { Wallet } from '../libs/wallet';
+import { fetchSideswapAssets, fetchSideswapMarkets, fetchSideswapMarket, fetchSideswapSubscribePrice, Quote as SideswapQuote, Market as SideswapMarket, Asset as SideswapAsset, Price as SideswapPrice,} from '../libs/sideswap';
 
 enum Screen {
   Home="Home",
   Wallet="Wallet",
   Jade="Jade"
+}
+
+class TimeValue {
+  value!: number;
+  time!: number;
+  constructor (time: number, value: number) {
+    this.time = time
+    this.value = value
+  }
 }
 
 const theme = createTheme({
@@ -56,7 +60,6 @@ const theme = createTheme({
 });
 function Details() {
 
-
   const [assets, setAssets] = useState(new Map<string, Asset>());
   const [sideswapAsset, setSideswapAsset] = useState<SideswapAsset>();
   const [sideswapMarkets, setSideswapMarkets] = useState<SideswapMarket[]>([]);
@@ -68,6 +71,10 @@ function Details() {
   const [addressText, setAddressText] = useState("");
   const [addressQrcode, setAddressQrcode] = useState("");
   const [balances, setBalances] = useState(new Map<string, number>());
+
+  const [tlvCap, setTlvCap] = useState<TimeValue[]>([]);
+  const [tlvPrice, setTlvPrice] = useState<TimeValue[]>([]);
+
   // bitfinex
   const [bitfinexsSecurities, setBitfinexSecurities] = useState<string[]>([]);
   const [bitfinexTickers, setBitfinexTickers] = useState<BitfinexTicker[]>([]);
@@ -189,26 +196,71 @@ function Details() {
         .filter((t) => [t.base, t.quote].includes(asset?.ticker ?? ""))
     );
   }
+
+  async function loadTlv() {
+    const txs = await loadEsploraAssetTxs(assetId);
+    console.log("tlv txs ",txs);
+    var marketcap = 0;
+    var tlv: TimeValue[] = [];
+    for (const tx of txs.reverse()) {
+      for (const vin of tx.vin) {
+        if (vin.issuance && vin.issuance.asset_id == assetId) {
+          marketcap += vin.issuance.assetamount
+        }
+      }
+      for (const vout of tx.vout) {
+        console.log("tlv vout",vout);
+        if (vout && vout.scriptpubkey_type == "op_return") {
+          console.log("tlv op_return",vout.value ?? 0);
+          marketcap -= vout.value ?? 0
+        }
+      }
+      tlv.push(new TimeValue(tx.status.block_time, marketcap))
+    }
+    console.log("tlv data",tlv);
+    setTlvCap([...tlv]);
+  }
   async function loadSideswap() {
-    console.log("sideswap load");
-    await connectSideswap();
-    console.log("sideswap connected");
-    const asset = await localSideswapAssets();
+    const asset = await fetchSideswapAssets();
     setSideswapAsset(asset.filter((asset) => asset.asset_id == assetId)[0]);
-    console.log("details sideswap asset", asset);
-    const markets: SideswapMarket[] = await localSideswapMarkets();
+    console.log("sideswap asset", asset);
+    const markets: SideswapMarket[] = await fetchSideswapMarkets();
     const filteredMarkets = markets.filter((m) => m.asset_pair.base == assetId || m.asset_pair.quote == assetId);
     setSideswapMarkets([...filteredMarkets]);
-    console.log("details sideswap markets", filteredMarkets.length);
-    for (const market of filteredMarkets) {
+    console.log("sideswap markets", filteredMarkets);
+
+    var assetTetherMarket = filteredMarkets.filter(m => m.asset_pair.base == tether || m.asset_pair.quote == tether)[0];
+    var assetLbtcMarket = filteredMarkets.filter(m => m.asset_pair.base == policyAsset || m.asset_pair.quote == policyAsset)[0];
+    if (assetTetherMarket) {
+      const quotes: SideswapQuote[] = await fetchSideswapMarket(assetTetherMarket.asset_pair.base, assetTetherMarket.asset_pair.quote);
+      setSideswapQuotes([...quotes]);
+      console.log("sideswap quotes", quotes);
+      const tlv = quotes.map(q => new TimeValue(moment(q.time).unix(), q.close));
+      setTlvPrice([...tlv]);
+      console.log("setTlvPrice", tlv);
+    } else if (assetLbtcMarket) {
+      const tetherQuotes: SideswapQuote[] = await fetchSideswapMarket(policyAsset, tether);
+      const assetQuotes: SideswapQuote[] = await fetchSideswapMarket(assetLbtcMarket.asset_pair.base, assetLbtcMarket.asset_pair.quote);
+      for (const i in assetQuotes) {
+        const tether = tetherQuotes.filter(t => t.time == assetQuotes[i].time)[0];
+        const direction = assetLbtcMarket.asset_pair.base == assetId ? 1 : 0;
+        assetQuotes[i].close = assetQuotes[i].close * (direction ? tether.close : 1/tether.close);
+      }
+      setSideswapQuotes([...assetQuotes]);
+      console.log("sideswap quotes", assetQuotes);
+      const tlv = assetQuotes.map(q => new TimeValue(moment(q.time).unix(), q.close));
+      setTlvPrice([...tlv]);
+      console.log("setTlvPrice", tlv);
+    }
+    for (const market of sideswapMarkets) {
       const delegate = (price: SideswapPrice) => {
         if (price.asset_pair.base != assetId && price.asset_pair.quote != assetId) {
           return;
         }
         updateSideswapPrices(price);
-        console.log("details sideswap prices", sideswapPrices);
+        console.log("sideswap price", sideswapPrices);
       }
-      subscribeSideswapPrice(market.asset_pair.base, market.asset_pair.quote,delegate);
+      fetchSideswapSubscribePrice(market.asset_pair.base, market.asset_pair.quote,delegate);
       const esploraAssets = await loadEsploraAssets([market.asset_pair.base, market.asset_pair.quote]);
       updateEsploraAssets(esploraAssets);
     }
@@ -239,6 +291,9 @@ function Details() {
   useEffect(() => {
     loadAssets();
   }, []);
+  useEffect(() => {
+    loadTlv();
+  }, [assets]);
   useEffect(() => {
     loadStokr();
   }, [assets]);
@@ -336,7 +391,6 @@ function Details() {
           </Container>
         </Container>
 
-      
         {balances.get(assetId) != null && (
           <Container maxWidth="md">
             <div className='RowCard_rowCard__u8FAF'>
@@ -483,7 +537,69 @@ function Details() {
             </div>
           </Container>
         }
-      
+
+        <div className="darkBg text-white pt-4 pb-6">
+          <section className="page_chartSection__sELnz">
+            <h2 className="__className_a99301 font-h2 font-regular mb-4 text-center">Timeline</h2>
+            <div className="Chart_chartRow__ekIHV container mb-3">
+              <div className="Chart_chartArea___5quf col-2">
+                <h4 className="font-h4 font-regular __className_a99301">Circulating in {assets.get(assetId)?.ticker}</h4>
+                <div style={{width: '100%', height: '315px', minWidth: '0px'}}>
+                  <ResponsiveContainer>
+                          <AreaChart
+                            data={tlvCap}
+                            margin={{
+                              top: 10,
+                              right: 30,
+                              left: 0,
+                              bottom: 0,
+                            }}
+                          >
+                            <XAxis
+                              dataKey = 'time'
+                              domain = {['auto', 'auto']}
+                              name = 'Time'
+                              tickFormatter = {(unixTime) => moment(unixTime*1000).format('YYYY-MM-DD')}
+                              type = 'number'
+                            />
+                            <YAxis dataKey = 'value' name = 'Value' />
+                            <Tooltip />
+                            <Area type="monotone" dataKey="value" stroke-width="2.5" stroke="#22E1C9" fill-opacity="1" />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                </div>
+              </div>
+              <div className="Chart_chartArea___5quf col-2">
+                <h4 className="font-h4 font-regular __className_a99301">Price {assets.get(assetId)?.ticker} in USDt</h4>
+                <div style={{width: '100%', height: '315px', minWidth: '0px'}}>
+                  <ResponsiveContainer>
+                          <AreaChart
+                            data={tlvPrice}
+                            margin={{
+                              top: 10,
+                              right: 30,
+                              left: 0,
+                              bottom: 0,
+                            }}
+                          >
+                          <XAxis
+                            dataKey = 'time'
+                            domain = {['auto', 'auto']}
+                            name = 'Time'
+                            tickFormatter = {(unixTime) => moment(unixTime*1000).format('YYYY-MM-DD')}
+                            type = 'number'
+                          />
+                            <YAxis dataKey = 'value' name = 'Value' />
+                            <Tooltip />
+                            <Area type="monotone" dataKey="value" stroke-width="2.5" stroke="#22E1C9" fill-opacity="1" />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
       </ThemeProvider>
     </main>
   );

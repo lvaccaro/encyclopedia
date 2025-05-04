@@ -2,13 +2,11 @@ import logo from './logo.svg';
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useNavigation } from 'react-router-dom';
+import RiveComponent from '@rive-app/react-canvas';
 import { createTheme, ThemeProvider, createStyles } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
 import LinearProgress from '@mui/material/LinearProgress';
 import Button from '@mui/material/Button';
-import AppBar from '@mui/material/AppBar';
-import SendIcon from '@mui/icons-material/Send';
-import ButtonGroup from '@mui/material/ButtonGroup';
 import millify from "millify";
 //import Image from "next/image";
 import {
@@ -24,14 +22,13 @@ import {
   Typography,
   Box,
 } from '@mui/material';
-import { localSideswapAssets, localSideswapMarkets, Quote as SideswapQuote, Market as SideswapMarket, Asset as SideswapAsset, connectSideswap, subscribeSideswapPrice, Price as SideswapPrice, Price } from '../libs/sideswap';
 import { fetchAssets, policyAsset, Asset, tether } from '../libs/registry';
 import { loadStokrAssets, StokrAsset } from '../libs/stokr';
 import { loadBitfinexSecurities, loadBitfinexTickers, BitfinexTicker } from '../libs/bitfinex';
 import { EsploraAsset, loadEsploraAsset, loadEsploraAssets } from '../libs/esplora';
 import { Wallet } from '../libs/wallet';
-import RiveComponent from '@rive-app/react-canvas';
-import { Console } from 'console';
+import { fetchSideswapAssets, fetchSideswapMarkets, fetchSideswapMarket, fetchSideswapSubscribePrice, Quote as SideswapQuote, Market as SideswapMarket, Asset as SideswapAsset, Price as SideswapPrice,} from '../libs/sideswap';
+
 
 enum Screen {
   Home="Home",
@@ -243,15 +240,13 @@ function Home() {
   }
 
   async function loadSideswap() {
-    console.log("sideswap load");
-    await connectSideswap();
     console.log("sideswap connected");
-    const assets: SideswapAsset[] = await localSideswapAssets();
+    const assets: SideswapAsset[] = await fetchSideswapAssets();
     setSideswapAssets([...assets]);
     console.log("sideswap assets", assets.length);
     const updates = await loadEsploraAssets(assets.map((a) => a.asset_id));
     updateEsploraAssets(updates);
-    const markets: SideswapMarket[] = await localSideswapMarkets();
+    const markets: SideswapMarket[] = await fetchSideswapMarkets();
     setSideswapMarkets([...markets]);
     console.log("sideswap markets", markets.length);
 
@@ -275,7 +270,7 @@ function Home() {
         }
         updateSideswapPrices(price);
       }
-      subscribeSideswapPrice(market.asset_pair.base, market.asset_pair.quote, delegate);
+      fetchSideswapSubscribePrice(market.asset_pair.base, market.asset_pair.quote, delegate);
     }
   }
 
