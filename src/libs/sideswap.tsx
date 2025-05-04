@@ -172,37 +172,8 @@ export const fetchSideswapSubscribePrice = async (base: string, quote: string, c
         }
       };
     subscribe("market", params, (msg) => {
-      console.log('msg');
-      console.log(msg);
       if (msg.params?.market_price) {
         callback(msg.params?.market_price as Price)
       }
     });
  };
-
-/*
-  return (
-    <div>
-      <p>WebSocket Status: {isConnected ? 'Connected' : 'Disconnected'}</p>
-      {isConnected && (
-        <div>
-          <button onClick={() => sendMessage('assets', { "all_assets": true, "embedded_icons": false }).then(response => console.log('Data Response:', response)).catch(error => console.error('Send Error:', error))}>
-          fetch Sideswap Assets
-          </button>
-          <button onClick={() => sendMessage('market', { "list_markets": {} }).then(response => console.log('Data Response:', response)).catch(error => console.error('Send Error:', error))}>
-          fetch Sideswap Markets
-          </button>
-          <button onClick={() => sendMessage('market', { "chart_sub": { "asset_pair": {"base":base,"quote":quote}} }).then(response => console.log('Data Response:', response)).catch(error => console.error('Send Error:', error))}>
-          fetch Sideswap Market lbtc/usdt
-          </button>
-          <button onClick={() => subscribe('market', {"subscribe": {"asset_pair": {"base":base,"quote":quote}}})}>
-            Subscribe to Notifications
-            </button>
-          <button onClick={() => unsubscribe('market', {"subscribe": {"asset_pair": {"base":base,"quote":quote}}})}>
-            Unsubscribe from Price
-        </button>
-        </div>
-      )}
-    </div>
-  );
-*/

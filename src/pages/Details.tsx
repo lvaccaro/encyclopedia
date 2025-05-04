@@ -213,6 +213,8 @@ function Details() {
         if (vout && vout.scriptpubkey_type == "op_return") {
           console.log("tlv op_return",vout.value ?? 0);
           marketcap -= vout.value ?? 0
+        } else if (vout && vout.asset == assetId) {
+          marketcap += vout.value ?? 0
         }
       }
       tlv.push(new TimeValue(tx.status.block_time, marketcap))
@@ -231,7 +233,9 @@ function Details() {
 
     var assetTetherMarket = filteredMarkets.filter(m => m.asset_pair.base == tether || m.asset_pair.quote == tether)[0];
     var assetLbtcMarket = filteredMarkets.filter(m => m.asset_pair.base == policyAsset || m.asset_pair.quote == policyAsset)[0];
-    if (assetTetherMarket) {
+    if (assetId == tether) {
+      setTlvPrice([]);
+    } else if (assetTetherMarket) {
       const quotes: SideswapQuote[] = await fetchSideswapMarket(assetTetherMarket.asset_pair.base, assetTetherMarket.asset_pair.quote);
       setSideswapQuotes([...quotes]);
       console.log("sideswap quotes", quotes);
@@ -252,13 +256,13 @@ function Details() {
       setTlvPrice([...tlv]);
       console.log("setTlvPrice", tlv);
     }
-    for (const market of sideswapMarkets) {
+    for (const market of filteredMarkets) {
       const delegate = (price: SideswapPrice) => {
+        console.log("sideswap price", sideswapPrices);
         if (price.asset_pair.base != assetId && price.asset_pair.quote != assetId) {
           return;
         }
         updateSideswapPrices(price);
-        console.log("sideswap price", sideswapPrices);
       }
       fetchSideswapSubscribePrice(market.asset_pair.base, market.asset_pair.quote,delegate);
       const esploraAssets = await loadEsploraAssets([market.asset_pair.base, market.asset_pair.quote]);

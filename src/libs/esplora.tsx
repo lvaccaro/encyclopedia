@@ -38,7 +38,7 @@ export class EsploraAssetTxVout {
   scriptpubkey_type!: string
   scriptpubkey_address?: string
   value?: number
-  asset?: number
+  asset?: string
 }
 export class EsploraAssetTx {
   txid!: string
