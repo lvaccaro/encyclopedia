@@ -23,8 +23,8 @@ export class Issuance {
 }
 export async function fetchAssets(): Promise<Map<string, Asset>> {
   const res = await fetch("/assets/assets.minimal.json")
-  const text = await res.json();
-  const assets: Map<string,(string|number|null)[]> = text as unknown as Map<string,(string|number|null)[]>;
+  const json = await res.json();
+  const assets: Map<string,(string|number|null)[]> = json as unknown as Map<string,(string|number|null)[]>;
   const list = new Map<string, Asset>();
   for (const a of Object.entries(assets)) {
     const asset = new Asset();
@@ -40,14 +40,30 @@ export async function fetchAssets(): Promise<Map<string, Asset>> {
 }
 
 export async function fetchPriorityAssets(): Promise<string[]> {
-  return await fetch('/assets/priority_assets.json');
+  return await (await fetch('/assets/priority_assets.json')).json();
 }
 
 export async function fetchIssuancesFor(asset: string): Promise<Issuance[]> {
-  const res = await fetch(`/assets/issuances/${asset}.json`);
+  const res = await fetch(`/issuances/${asset}.json`);
   if (!res.ok) {
     throw new Error(`Failed to fetch issuances for asset ${asset}: ${res.statusText}`);
   }
-  const issuances: Issuance[] = await res.json();
-  return issuances;
+  const json = await res.json();
+  const issuances: (string|number|null)[] = json as unknown as (string|number|null)[];
+  const list: Issuance[] = [];
+  for (const issuance of issuances) {
+    if (Array.isArray(issuance)) {
+      list.push({
+        block: issuance[0] as number,
+        datetime: issuance[1] as number,
+        asset: issuance[2] as string,
+        amount: issuance[3] as number,
+        txid: issuance[4] as string,
+        txindex: issuance[5] as number,
+        token: issuance[6] as string || undefined,
+        tokenamount: issuance[7] as number || undefined
+      });
+    }
+  }
+  return list;
 }

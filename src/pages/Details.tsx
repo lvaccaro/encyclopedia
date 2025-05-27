@@ -75,6 +75,7 @@ function Details() {
   const [issuances, setIssuances] = useState<Issuance[]>([]);
   const [tlvCap, setTlvCap] = useState<TimeValue[]>([]);
   const [tlvPrice, setTlvPrice] = useState<TimeValue[]>([]);
+  const [tlvMarketCap, setTlvMarketCap] = useState<TimeValue[]>([]);
 
   // bitfinex
   const [bitfinexsSecurities, setBitfinexSecurities] = useState<string[]>([]);
@@ -187,6 +188,66 @@ function Details() {
   async function loadIssuances() {
     const data = await fetchIssuancesFor(assetId);
     setIssuances([...data]);
+  }
+/**
+ * Multiplies two time series (price and amount) to calculate market cap.
+ * Assumes that values are valid from their timestamp until the next timestamp in the series.
+ *
+ * @param {Array<Object>} priceSeries An array of objects: [{ timestamp: number, value: number }]
+ * @param {Array<Object>} amountSeries An array of objects: [{ timestamp: number, value: number }]
+ * @returns {Array<Object>} An array of objects representing the market cap time series: [{ timestamp: number, value: number }]
+ */
+function calculateMarketCap(priceSeries: TimeValue[], amountSeries: TimeValue[]): TimeValue[] {
+  if (!priceSeries || priceSeries.length === 0 || !amountSeries || amountSeries.length === 0) {
+      console.warn("One of the input series is empty or invalid. Returning empty market cap series.");
+      return [];
+  }
+  // Sort both series by timestamp to ensure correct processing
+  priceSeries.sort((a, b) => a.time - b.time);
+  amountSeries.sort((a, b) => a.time - b.time);
+  const marketCapSeries = [];
+  let priceIndex = 0;
+  let amountIndex = 0;
+  let currentPrice = null;
+  let currentAmount = null;
+  // Create a set of all unique timestamps from both series
+  const allTimestamps = new Set<number>();
+  priceSeries.forEach(data => allTimestamps.add(data.time));
+  amountSeries.forEach(data => allTimestamps.add(data.time));
+  // Convert set to sorted array
+  const sortedUniqueTimestamps = Array.from(allTimestamps).sort((a, b) => a - b);
+  for (const timestamp of sortedUniqueTimestamps) {
+      // Update current price if a new price point is encountered at or before the current timestamp
+      while (priceIndex < priceSeries.length && priceSeries[priceIndex].time <= timestamp) {
+          currentPrice = priceSeries[priceIndex].value;
+          priceIndex++;
+      }
+      // Update current amount if a new amount point is encountered at or before the current timestamp
+      while (amountIndex < amountSeries.length && amountSeries[amountIndex].time <= timestamp) {
+          currentAmount = amountSeries[amountIndex].value;
+          amountIndex++;
+      }
+      // If we have both a price and an amount, calculate market cap
+      if (currentPrice !== null && currentAmount !== null) {
+          marketCapSeries.push(new TimeValue(timestamp, currentPrice * currentAmount));
+      }
+  }
+  return marketCapSeries;
+}
+
+  async function loadTlvMarketCap() {
+    const prices = tlvPrice;
+    const cap = tlvCap;
+    console.log("loadTlvMarketCap");
+    console.log(prices);
+    console.log(cap);
+    if (prices.length == 0 || cap.length == 0) {
+      console.warn("No prices or cap data available for market cap calculation.");
+      setTlvMarketCap([]);
+      return;
+    }
+    const marketCap = calculateMarketCap(prices,cap);
+    setTlvMarketCap([...marketCap]);
   }
 
   async function loadBitfinex() {
@@ -306,6 +367,9 @@ function Details() {
   useEffect(() => {
     loadTlv();
   }, [assets]);
+  useEffect(() => {
+    loadTlvMarketCap();
+  }, [tlvCap, tlvPrice]);
   useEffect(() => {
     loadStokr();
   }, [assets]);
@@ -574,7 +638,7 @@ function Details() {
                               tickFormatter = {(unixTime) => moment(unixTime*1000).format('YYYY-MM-DD')}
                               type = 'number'
                             />
-                            <YAxis dataKey = 'value' name = 'Value' />
+                            <YAxis dataKey = 'value' name = 'Value' tickFormatter={minify}/>
                             <Tooltip />
                             <Area type="monotone" dataKey="value" stroke-width="2.5" stroke="#22E1C9" fill-opacity="1" />
                           </AreaChart>
@@ -601,7 +665,7 @@ function Details() {
                             tickFormatter = {(unixTime) => moment(unixTime*1000).format('YYYY-MM-DD')}
                             type = 'number'
                           />
-                            <YAxis dataKey = 'value' name = 'Value' />
+                            <YAxis dataKey = 'value' name = 'Value' tickFormatter={minify}/>
                             <Tooltip />
                             <Area type="monotone" dataKey="value" stroke-width="2.5" stroke="#22E1C9" fill-opacity="1" />
                           </AreaChart>
@@ -610,6 +674,41 @@ function Details() {
               </div>
             </div>
           </section>
+        </div>
+
+        <div className="darkBg text-white pt-4 pb-6"> 
+          <section className="page_chartSection__sELnz">
+            <h2 className="__className_a99301 font-h2 font-regular mb-4 text-center">MarketCap of {assets.get(assetId)?.ticker}</h2>
+            <div className="Chart_chartRow__ekIHV container mb-3">
+              <div className="Chart_chartArea___5quf col-1">
+                <div style={{width: '100%', height: '315px', minWidth: '0px'}}>
+                  <ResponsiveContainer>
+                          <AreaChart
+                            data={tlvMarketCap}
+                            margin={{
+                              top: 10,
+                              right: 30,
+                              left: 0,
+                              bottom: 0,
+                            }}
+                          >
+                            <XAxis
+                              dataKey = 'time'
+                              domain = {['auto', 'auto']}
+                              name = 'Time'
+                              tickFormatter = {(unixTime) => moment(unixTime*1000).format('YYYY-MM-DD')}
+                              type = 'number'
+                            />
+                            <YAxis dataKey = 'value' name = 'Value' tickFormatter={minify}/>
+                            <Tooltip />
+                            <Area type="monotone" dataKey="value" stroke-width="2.5" stroke="#22E1C9" fill-opacity="1" />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+          </section>
+          
         </div>
 
       </ThemeProvider>
