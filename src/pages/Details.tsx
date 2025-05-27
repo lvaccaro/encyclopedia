@@ -20,7 +20,7 @@ import {
   Box,
 } from '@mui/material';
 
-import { fetchAssets, policyAsset, Asset, tether } from '../libs/registry';
+import { fetchAssets, policyAsset, Asset, tether, Issuance, fetchIssuancesFor } from '../libs/registry';
 import { loadStokrAssets, StokrAsset } from '../libs/stokr';
 import { loadBitfinexSecurities, loadBitfinexTickers, BitfinexTicker } from '../libs/bitfinex';
 import { EsploraAsset, loadEsploraAssetTxs, loadEsploraAssets } from '../libs/esplora';
@@ -72,6 +72,7 @@ function Details() {
   const [addressQrcode, setAddressQrcode] = useState("");
   const [balances, setBalances] = useState(new Map<string, number>());
 
+  const [issuances, setIssuances] = useState<Issuance[]>([]);
   const [tlvCap, setTlvCap] = useState<TimeValue[]>([]);
   const [tlvPrice, setTlvPrice] = useState<TimeValue[]>([]);
 
@@ -182,6 +183,10 @@ function Details() {
   async function loadStokr() {
     const data = await loadStokrAssets();
     updateStokrAssets(data);
+  }
+  async function loadIssuances() {
+    const data = await fetchIssuancesFor(assetId);
+    setIssuances([...data]);
   }
 
   async function loadBitfinex() {
@@ -294,6 +299,9 @@ function Details() {
 
   useEffect(() => {
     loadAssets();
+  }, []);
+  useEffect(() => {
+    loadIssuances();
   }, []);
   useEffect(() => {
     loadTlv();

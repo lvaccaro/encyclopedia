@@ -11,6 +11,16 @@ export class Asset {
   precision: number | undefined;
   icon: string | undefined;
 }
+export class Issuance {
+  block!: number;
+  datetime!: number
+  asset!: string;
+  amount!: number;
+  txid!: string;
+  txindex!: number;
+  token?: string;
+  tokenamount?: number;
+}
 export async function fetchAssets(): Promise<Map<string, Asset>> {
   const res = await fetch("/assets/assets.minimal.json")
   const text = await res.json();
@@ -30,5 +40,14 @@ export async function fetchAssets(): Promise<Map<string, Asset>> {
 }
 
 export async function fetchPriorityAssets(): Promise<string[]> {
-  const res = await fetch('/assets/priority_assets.json')
+  return await fetch('/assets/priority_assets.json');
+}
+
+export async function fetchIssuancesFor(asset: string): Promise<Issuance[]> {
+  const res = await fetch(`/assets/issuances/${asset}.json`);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch issuances for asset ${asset}: ${res.statusText}`);
+  }
+  const issuances: Issuance[] = await res.json();
+  return issuances;
 }
